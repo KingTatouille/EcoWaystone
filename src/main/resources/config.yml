@@ -2,56 +2,42 @@
 # Locale for language files (lang-{locale}.yml)
 locale: "en_US"
 
-# Teleportation Settings
-wait-time: 60 # Time in ticks before teleporting (20 ticks = 1 second)
-damage-stops-warping: true # Whether taking damage prevents teleportation
+# Admin Waystone System
+admin-waystones:
+  # Enable admin waystone system
+  enabled: true
+  # ItemsAdder item ID for waystone blocks
+  waystone-item: "ecowaystone:waystone"
+  # Default icon for waystones in GUI
+  default-icon: "ecowaystone:waystone"
+  # Enable discovery rewards
+  enable-rewards: true
+  # Sound effect when discovering a waystone
+  discovery-sound: "ENTITY_PLAYER_LEVELUP"
+  # Broadcast discovery to all players
+  broadcast-discovery: false
+  # Show distance in GUI
+  show-distance: true
+  # Discovery cost with Vault
+  discovery-cost: 1000.0
+  # GUI settings
+  gui:
+    title: "&bWaystones"
+    rows: 6
+    fill-empty-slots: true
 
-# Distance and Range Settings
-limit-distance: true # Whether to limit waystone range
-base-distance: 100 # Minimum range for waystones in blocks
-max-boost: 150 # Maximum boost amount per block
-max-warp-size: 50 # Maximum number of boost blocks a waystone can use
 
-# Cross-Dimensional Travel
-jump-worlds: true # Allow teleporting between dimensions
-world-ratio: 8 # Divide max range by this amount for inter-dimensional warps
+# Zone Discovery System
+zones:
+  discovery:
+    title: "Région découverte !"
+    subtitle: "Vous avez découvert %zone%"
+    sound:
+      # Son à jouer lors de la découverte d'une zone
+      # Formats supportés:
+      # - Sons Minecraft vanilla: ENTITY_PLAYER_LEVELUP, UI_TOAST_CHALLENGE_COMPLETE
+      # - Sons custom du resource pack: votre_pack:discovery_sound
+      name: "ENTITY_PLAYER_LEVELUP"
+      volume: 1.0
+      pitch: 1.2
 
-# Visual and Effects
-warp-animations: true # Show particle effects during teleportation
-
-# Warp Key Settings
-single-use: false # Whether warp keys are destroyed after use
-relinkable-keys: true # Whether warp keys can be relinked
-enable-key-items: true # Use custom warp key items instead of compasses
-
-# Power System
-require-power: "INTER_DIMENSION" # NONE, INTER_DIMENSION, or ALL
-power-cost: 1 # Power consumed per warp
-
-# Portal Sickness System
-enable-portal-sickness: true # Enable portal sickness effects
-portal-sickness-chance: 0.05 # Chance of getting portal sickness (0.0-1.0)
-portal-sickness-warping: "DAMAGE_ON_TELEPORT" # ALLOW, PREVENT_TELEPORT, or DAMAGE_ON_TELEPORT
-portal-sickness-damage: 5.0 # Damage taken when warping while sick
-
-# Advancement System
-enable-advancements: true # Enable custom advancements
-
-# Custom Warp Key Recipe (when enable-key-items is true)
-key-recipe:
-  shape:
-    - "GIG"
-    - "ICI"
-    - "GIG"
-  ingredients:
-    G: "GOLD_INGOT"
-    I: "IRON_INGOT"
-    C: "COMPASS"
-
-# Block boost values (percentage of max-boost)
-boost-blocks:
-  NETHERITE_BLOCK: 1.0    # 100% boost
-  EMERALD_BLOCK: 0.75     # 75% boost
-  DIAMOND_BLOCK: 0.5      # 50% boost
-  GOLD_BLOCK: 0.33        # 33% boost
-  IRON_BLOCK: 0.2         # 20% boost

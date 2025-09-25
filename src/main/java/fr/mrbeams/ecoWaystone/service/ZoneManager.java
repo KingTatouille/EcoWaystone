@@ -30,23 +30,34 @@ public class ZoneManager {
     private final Map<String, DiscoveryZone> zones;
     private final Map<UUID, PlayerZoneDiscovery> playerDiscoveries;
     private final File zonesDirectory;
-    private final File playerDataFile;
+    private final File playersDirectory;
 
     public ZoneManager(EcoWaystone plugin) {
         this.plugin = plugin;
         this.zones = new HashMap<>();
         this.playerDiscoveries = new HashMap<>();
         this.zonesDirectory = new File(plugin.getDataFolder(), "zones");
-        this.playerDataFile = new File(plugin.getDataFolder(), "zone_discoveries.yml");
+        this.playersDirectory = new File(plugin.getDataFolder(), "players");
 
         if (!zonesDirectory.exists()) {
             zonesDirectory.mkdirs();
+        }
+        if (!playersDirectory.exists()) {
+            playersDirectory.mkdirs();
         }
 
         loadData();
     }
 
     public void createZone(String regionName, String displayName, World world) {
+        createZone(regionName, displayName, world, null);
+    }
+
+    public void createZone(String regionName, String displayName, World world, String customItem) {
+        createZone(regionName, displayName, "", world, customItem);
+    }
+
+    public void createZone(String regionName, String displayName, String description, World world, String customItem) {
         // Vérifier que la région existe dans WorldGuard
         RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer()
                 .get(BukkitAdapter.adapt(world));
@@ -71,13 +82,18 @@ public class ZoneManager {
                 .replace("%zone%", displayName);
 
         // Créer la zone
-        DiscoveryZone zone = new DiscoveryZone(zoneId, regionName, displayName, titleMessage, subtitleMessage);
+        DiscoveryZone zone = new DiscoveryZone(zoneId, regionName, displayName, description, titleMessage, subtitleMessage, customItem);
         zones.put(zoneId, zone);
 
         // Créer le fichier .yml pour cette zone
         saveZoneFile(zone);
 
-        plugin.getLogger().info("Zone de découverte créée: " + displayName + " (ID: " + zoneId + ", Région: " + regionName + ")");
+        String logMessage = "Zone de découverte créée: " + displayName + " (ID: " + zoneId + ", Région: " + regionName;
+        if (customItem != null && !customItem.isEmpty()) {
+            logMessage += ", Item custom: " + customItem;
+        }
+        logMessage += ")";
+        plugin.getLogger().info(logMessage);
     }
 
     public boolean discoverZone(Player player, String zoneId) {
@@ -90,12 +106,13 @@ public class ZoneManager {
         }
 
         discovery.addDiscoveredZone(zoneId);
-        savePlayerData();
+        savePlayerData(playerId, discovery);
 
-        // Afficher le titre si la zone existe
+        // Afficher le titre et jouer le son si la zone existe
         DiscoveryZone zone = zones.get(zoneId);
         if (zone != null) {
             showDiscoveryTitle(player, zone);
+            plugin.getSoundManager().playDiscoverySound(player);
         }
 
         return true;
@@ -110,7 +127,7 @@ public class ZoneManager {
         }
 
         discovery.removeDiscoveredZone(zoneId);
-        savePlayerData();
+        savePlayerData(playerId, discovery);
 
         return true;
     }
@@ -135,7 +152,7 @@ public class ZoneManager {
 
     public DiscoveryZone getZoneByRegion(String regionName) {
         return zones.values().stream()
-                .filter(zone -> zone.getRegionName().equals(regionName))
+                .filter(zone -> zone.getRegionName().equalsIgnoreCase(regionName))
                 .findFirst()
                 .orElse(null);
     }
@@ -212,40 +229,77 @@ public class ZoneManager {
     }
 
     private void loadPlayerData() {
-        if (!playerDataFile.exists()) {
+        if (!playersDirectory.exists()) {
             return;
         }
 
-        try {
-            FileConfiguration config = YamlConfiguration.loadConfiguration(playerDataFile);
+        File[] playerFiles = playersDirectory.listFiles((dir, name) -> name.endsWith(".yml"));
+        if (playerFiles == null) {
+            return;
+        }
 
-            if (config.contains("discoveries")) {
-                for (String key : config.getConfigurationSection("discoveries").getKeys(false)) {
-                    Map<String, Object> data = config.getConfigurationSection("discoveries." + key).getValues(false);
-                    PlayerZoneDiscovery discovery = PlayerZoneDiscovery.deserialize(data);
-                    playerDiscoveries.put(discovery.getPlayerId(), discovery);
-                }
+        for (File playerFile : playerFiles) {
+            try {
+                FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+                Map<String, Object> data = config.getConfigurationSection("discovery").getValues(false);
+                PlayerZoneDiscovery discovery = PlayerZoneDiscovery.deserialize(data);
+                playerDiscoveries.put(discovery.getPlayerId(), discovery);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Erreur lors du chargement du fichier joueur: " + playerFile.getName());
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            plugin.getLogger().warning("Erreur lors du chargement des données de découverte des joueurs");
+        }
+
+        plugin.getLogger().info("Chargé les données de découverte de " + playerDiscoveries.size() + " joueur(s)");
+    }
+
+    private void savePlayerData() {
+        // Sauvegarder tous les joueurs
+        for (Map.Entry<UUID, PlayerZoneDiscovery> entry : playerDiscoveries.entrySet()) {
+            savePlayerData(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private void savePlayerData(UUID playerId, PlayerZoneDiscovery discovery) {
+        try {
+            File playerFile = new File(playersDirectory, playerId.toString() + ".yml");
+            FileConfiguration config = new YamlConfiguration();
+
+            config.set("discovery", discovery.serialize());
+            config.save(playerFile);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Erreur lors de la sauvegarde des données du joueur " + playerId);
             e.printStackTrace();
         }
     }
 
-    private void savePlayerData() {
-        try {
-            FileConfiguration config = new YamlConfiguration();
-
-            for (Map.Entry<UUID, PlayerZoneDiscovery> entry : playerDiscoveries.entrySet()) {
-                String key = entry.getKey().toString();
-                config.set("discoveries." + key, entry.getValue().serialize());
-            }
-
-            config.save(playerDataFile);
-        } catch (IOException e) {
-            plugin.getLogger().severe("Erreur lors de la sauvegarde des données de découverte des joueurs");
-            e.printStackTrace();
+    public boolean setZoneDescription(String zoneId, String description) {
+        DiscoveryZone oldZone = zones.get(zoneId);
+        if (oldZone == null) {
+            return false;
         }
+
+        // Créer une nouvelle zone avec la nouvelle description
+        DiscoveryZone newZone = new DiscoveryZone(
+            oldZone.getId(),
+            oldZone.getRegionName(),
+            oldZone.getDisplayName(),
+            description,
+            oldZone.getTitle(),
+            oldZone.getSubtitle(),
+            oldZone.getCustomItem()
+        );
+
+        // Conserver le spawn existant
+        newZone.setSpawnLocation(oldZone.getSpawnLocation());
+
+        // Remplacer l'ancienne zone
+        zones.put(zoneId, newZone);
+
+        // Sauvegarder le fichier de zone mis à jour
+        saveZoneFile(newZone);
+
+        return true;
     }
 
     public boolean setZoneSpawn(String zoneId, Location location) {
@@ -286,7 +340,80 @@ public class ZoneManager {
                 location.getBlockZ());
     }
 
+    public boolean deleteZone(String zoneId) {
+        DiscoveryZone zone = zones.get(zoneId);
+        if (zone == null) {
+            return false;
+        }
+
+        // Supprimer la zone de la mémoire
+        zones.remove(zoneId);
+
+        // Supprimer le fichier de zone
+        File zoneFile = new File(zonesDirectory, zoneId + ".yml");
+        if (zoneFile.exists()) {
+            boolean deleted = zoneFile.delete();
+            if (!deleted) {
+                plugin.getLogger().warning("Impossible de supprimer le fichier de zone: " + zoneFile.getName());
+            }
+        }
+
+        // Retirer cette zone de toutes les découvertes des joueurs
+        for (PlayerZoneDiscovery discovery : playerDiscoveries.values()) {
+            discovery.removeDiscoveredZone(zoneId);
+        }
+        savePlayerData();
+
+        plugin.getLogger().info("Zone supprimée: " + zone.getDisplayName() + " (ID: " + zoneId + ")");
+        return true;
+    }
+
     public void shutdown() {
         savePlayerData();
+    }
+
+    public int repairPlayerFiles() {
+        if (!playersDirectory.exists()) {
+            return 0;
+        }
+
+        File[] playerFiles = playersDirectory.listFiles((dir, name) -> name.endsWith(".yml"));
+        if (playerFiles == null) {
+            return 0;
+        }
+
+        int repairedCount = 0;
+        for (File playerFile : playerFiles) {
+            try {
+                FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+
+                // Vérifier si le fichier a le format problématique
+                if (config.contains("discovery.discoveredZones") &&
+                    config.isConfigurationSection("discovery.discoveredZones")) {
+
+                    // Charger les données avec la logique de désérialisation améliorée
+                    Map<String, Object> data = config.getConfigurationSection("discovery").getValues(false);
+                    PlayerZoneDiscovery discovery = PlayerZoneDiscovery.deserialize(data);
+
+                    // Sauvegarder avec le nouveau format
+                    config.set("discovery", discovery.serialize());
+                    config.save(playerFile);
+
+                    repairedCount++;
+                    plugin.getLogger().info("Fichier réparé: " + playerFile.getName());
+                }
+
+            } catch (Exception e) {
+                plugin.getLogger().warning("Erreur lors de la réparation du fichier: " + playerFile.getName() + " - " + e.getMessage());
+            }
+        }
+
+        // Recharger les données après réparation
+        if (repairedCount > 0) {
+            playerDiscoveries.clear();
+            loadPlayerData();
+        }
+
+        return repairedCount;
     }
 }

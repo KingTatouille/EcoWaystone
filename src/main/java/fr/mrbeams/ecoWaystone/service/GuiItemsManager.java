@@ -2,8 +2,8 @@ package fr.mrbeams.ecoWaystone.service;
 
 import dev.lone.itemsadder.api.CustomStack;
 import fr.mrbeams.ecoWaystone.EcoWaystone;
+import fr.mrbeams.ecoWaystone.util.ColorUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -39,10 +39,14 @@ public class GuiItemsManager {
     }
 
     public ItemStack createZoneItem(String zoneName, String regionName, String location, String distance, boolean discovered) {
-        return createZoneItem(zoneName, zoneName, regionName, location, distance, discovered);
+        return createZoneItem(zoneName, zoneName, "", regionName, location, distance, discovered);
     }
 
     public ItemStack createZoneItem(String zoneId, String zoneName, String regionName, String location, String distance, boolean discovered) {
+        return createZoneItem(zoneId, zoneName, "", regionName, location, distance, discovered);
+    }
+
+    public ItemStack createZoneItem(String zoneId, String zoneName, String description, String regionName, String location, String distance, boolean discovered) {
         ConfigurationSection section = getZoneItemSection(zoneId, discovered);
 
         ItemStack item = createItemFromSection(section);
@@ -51,17 +55,24 @@ public class GuiItemsManager {
         if (meta != null) {
             String displayName = section.getString("name", discovered ? "&a%zone_name%" : "&7Zone inconnue");
             displayName = displayName.replace("%zone_name%", zoneName);
-            meta.displayName(LegacyComponentSerializer.legacySection().deserialize(displayName));
+            meta.displayName(ColorUtils.parseColors(displayName));
 
             List<String> configLore = section.getStringList("lore");
             List<Component> lore = new ArrayList<>();
 
             for (String line : configLore) {
                 line = line.replace("%zone_name%", zoneName)
+                          .replace("%description%", description != null ? description : "")
                           .replace("%region%", regionName)
                           .replace("%location%", location != null ? location : "")
                           .replace("%distance%", distance != null ? distance : "");
-                lore.add(LegacyComponentSerializer.legacySection().deserialize(line));
+
+                // Si la ligne ne contient que la description et qu'elle est vide, on la skip
+                if (line.trim().isEmpty() && description != null && description.isEmpty()) {
+                    continue;
+                }
+
+                lore.add(ColorUtils.parseColors(line));
             }
 
             meta.lore(lore);
@@ -86,7 +97,7 @@ public class GuiItemsManager {
         if (meta != null) {
             String displayName = section.getString("name", discovered ? "&b%waystone_name%" : "&7Waystone inconnue");
             displayName = displayName.replace("%waystone_name%", waystoneName);
-            meta.displayName(LegacyComponentSerializer.legacySection().deserialize(displayName));
+            meta.displayName(ColorUtils.parseColors(displayName));
 
             List<String> configLore = section.getStringList("lore");
             List<Component> lore = new ArrayList<>();
@@ -96,7 +107,7 @@ public class GuiItemsManager {
                           .replace("%location%", location != null ? location : "")
                           .replace("%distance%", distance != null ? distance : "")
                           .replace("%cost%", cost != null ? cost : "");
-                lore.add(LegacyComponentSerializer.legacySection().deserialize(line));
+                lore.add(ColorUtils.parseColors(line));
             }
 
             meta.lore(lore);
@@ -117,14 +128,14 @@ public class GuiItemsManager {
 
         if (meta != null) {
             String displayName = section.getString("name", "&eNavigation");
-            meta.displayName(LegacyComponentSerializer.legacySection().deserialize(displayName));
+            meta.displayName(ColorUtils.parseColors(displayName));
 
             List<String> configLore = section.getStringList("lore");
             List<Component> lore = new ArrayList<>();
 
             for (String line : configLore) {
                 line = line.replace("%page%", String.valueOf(pageNumber));
-                lore.add(LegacyComponentSerializer.legacySection().deserialize(line));
+                lore.add(ColorUtils.parseColors(line));
             }
 
             meta.lore(lore);

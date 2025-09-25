@@ -1,8 +1,8 @@
 package fr.mrbeams.ecoWaystone.gui;
 
-import dev.lone.itemsadder.api.CustomStack;
 import fr.mrbeams.ecoWaystone.EcoWaystone;
-import fr.mrbeams.ecoWaystone.model.AdminWaystone;
+import fr.mrbeams.ecoWaystone.model.DiscoveryZone;
+import fr.mrbeams.ecoWaystone.service.GuiItemsManager;
 import fr.mrbeams.ecoWaystone.service.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,116 +13,191 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class WaystoneGUI {
 
+    private final Map<UUID, Integer> playerPages = new HashMap<>();
+    private static final int ITEMS_PER_PAGE = 45; // 5 rows of items, 1 row for navigation
+
     private final EcoWaystone plugin;
     private final MessageManager messageManager;
+    private final GuiItemsManager guiItemsManager;
 
-    public WaystoneGUI(EcoWaystone plugin, MessageManager messageManager) {
+    public WaystoneGUI(EcoWaystone plugin, MessageManager messageManager, GuiItemsManager guiItemsManager) {
         this.plugin = plugin;
         this.messageManager = messageManager;
+        this.guiItemsManager = guiItemsManager;
     }
 
     public void openWaystoneMenu(Player player) {
-        Collection<AdminWaystone> discoveredWaystones = plugin.getWaystoneManager().getDiscoveredWaystones(player);
+        openWaystoneMenu(player, 0);
+    }
 
-        int size = Math.max(9, ((discoveredWaystones.size() + 8) / 9) * 9);
-        if (size > 54) size = 54;
+    public void openWaystoneMenu(Player player, int page) {
+        Set<String> discoveredZones = plugin.getZoneManager().getDiscoveredZones(player);
+        Map<String, DiscoveryZone> allZones = plugin.getZoneManager().getAllZones();
 
-        Component title = messageManager.getMessage("gui.waystone.title", player);
-        Inventory gui = Bukkit.createInventory(null, size, title);
+        int totalZones = allZones.size();
+        int discoveredZonesCount = discoveredZones.size();
 
-        int slot = 0;
-        for (AdminWaystone waystone : discoveredWaystones) {
-            if (slot >= size - 9) break;
-
-            ItemStack item = createWaystoneItem(waystone, player);
-            gui.setItem(slot, item);
-            slot++;
+        if (allZones.isEmpty()) {
+            Component message = Component.text("Aucune zone n'existe encore ! ")
+                    .color(NamedTextColor.YELLOW);
+            player.sendMessage(message);
+            return;
         }
 
-        for (int i = size - 9; i < size; i++) {
-            gui.setItem(i, createFillerItem());
+        // Créer la liste des éléments GUI
+        List<GuiItem> allItems = new ArrayList<>();
+
+        // Ajouter les zones découvertes
+        for (String zoneId : discoveredZones) {
+            DiscoveryZone zone = allZones.get(zoneId);
+            if (zone != null) {
+                allItems.add(new GuiItem(zone, true)); // true = découverte
+            }
         }
 
-        ItemStack closeItem = createCloseItem();
-        gui.setItem(size - 1, closeItem);
+        // Ajouter les zones non découvertes
+        for (DiscoveryZone zone : allZones.values()) {
+            if (!discoveredZones.contains(zone.getId())) {
+                allItems.add(new GuiItem(zone, false)); // false = non découverte
+            }
+        }
+
+        int maxPages = (int) Math.ceil((double) allItems.size() / ITEMS_PER_PAGE);
+        if (maxPages == 0) maxPages = 1;
+
+        page = Math.max(0, Math.min(page, maxPages - 1));
+        playerPages.put(player.getUniqueId(), page);
+
+        Component title = Component.text("Zones (" + discoveredZonesCount + "/" + totalZones + ") - Page " + (page + 1) + "/" + maxPages)
+                .color(NamedTextColor.BLUE);
+        Inventory gui = Bukkit.createInventory(null, 54, title);
+
+        // Ajouter les éléments
+        int startIndex = page * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, allItems.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            GuiItem guiItem = allItems.get(i);
+            ItemStack item = createGuiItem(guiItem, player);
+            gui.setItem(i - startIndex, item);
+        }
+
+        // Navigation items
+        if (page > 0) {
+            gui.setItem(45, guiItemsManager.createNavigationItem("previous-page", page));
+        }
+
+        if (page < maxPages - 1) {
+            gui.setItem(53, guiItemsManager.createNavigationItem("next-page", page + 2));
+        }
+
+        gui.setItem(49, guiItemsManager.createNavigationItem("close", 0));
+
+        // Fill empty navigation slots
+        for (int i = 45; i < 54; i++) {
+            if (gui.getItem(i) == null) {
+                gui.setItem(i, guiItemsManager.createNavigationItem("filler", 0));
+            }
+        }
 
         player.openInventory(gui);
     }
 
-    private ItemStack createWaystoneItem(AdminWaystone waystone, Player player) {
-        ItemStack item;
-
-        CustomStack customStack = CustomStack.getInstance(waystone.getIconItem());
-        if (customStack != null) {
-            item = customStack.getItemStack().clone();
-        } else {
-            item = new ItemStack(Material.LODESTONE);
-        }
-
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            Component displayName = Component.text(waystone.getDisplayName())
-                    .color(NamedTextColor.AQUA);
-            meta.displayName(displayName);
-
-            List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("Location: " + formatLocation(waystone))
-                    .color(NamedTextColor.GRAY));
-
-            double distance = calculateDistance(player, waystone);
-            lore.add(Component.text("Distance: " + String.format("%.1f", distance) + " blocks")
-                    .color(NamedTextColor.YELLOW));
-
-            lore.add(Component.empty());
-            lore.add(messageManager.getMessage("gui.waystone.click_to_teleport", player));
-
-            meta.lore(lore);
-            item.setItemMeta(meta);
-        }
-
-        return item;
+    public void nextPage(Player player) {
+        int currentPage = playerPages.getOrDefault(player.getUniqueId(), 0);
+        openWaystoneMenu(player, currentPage + 1);
     }
 
-    private ItemStack createFillerItem() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.displayName(Component.text(" "));
-            item.setItemMeta(meta);
-        }
-        return item;
+    public void previousPage(Player player) {
+        int currentPage = playerPages.getOrDefault(player.getUniqueId(), 0);
+        openWaystoneMenu(player, currentPage - 1);
     }
 
-    private ItemStack createCloseItem() {
-        ItemStack item = new ItemStack(Material.BARRIER);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            Component displayName = Component.text("Close")
-                    .color(NamedTextColor.RED);
-            meta.displayName(displayName);
-            item.setItemMeta(meta);
+
+    private ItemStack createGuiItem(GuiItem guiItem, Player player) {
+        if (guiItem.getType() == GuiItem.ItemType.ZONE) {
+            return createZoneItem(guiItem.getZone(), player, guiItem.isDiscovered());
         }
-        return item;
+        return new ItemStack(Material.BARRIER);
     }
 
-    private String formatLocation(AdminWaystone waystone) {
+
+    private ItemStack createZoneItem(DiscoveryZone zone, Player player, boolean discovered) {
+        String location = formatZoneSpawnLocation(zone);
+        String distance = null;
+
+        if (discovered && zone.hasSpawn()) {
+            double distanceValue = calculateZoneSpawnDistance(player, zone);
+            if (distanceValue >= 0) {
+                distance = String.format("%.1f blocs", distanceValue);
+            } else {
+                distance = "Dimension différente";
+            }
+        }
+
+        return guiItemsManager.createZoneItem(
+            zone.getId(),
+            zone.getDisplayName(),
+            zone.getDescription(),
+            zone.getRegionName(),
+            location,
+            distance,
+            discovered
+        );
+    }
+
+
+
+
+
+    private String formatZoneSpawnLocation(DiscoveryZone zone) {
+        if (!zone.hasSpawn()) return "Aucun spawn";
         return String.format("%s: %d, %d, %d",
-                waystone.getLocation().getWorld().getName(),
-                waystone.getLocation().getBlockX(),
-                waystone.getLocation().getBlockY(),
-                waystone.getLocation().getBlockZ());
+                zone.getSpawnLocation().getWorld().getName(),
+                zone.getSpawnLocation().getBlockX(),
+                zone.getSpawnLocation().getBlockY(),
+                zone.getSpawnLocation().getBlockZ());
     }
 
-    private double calculateDistance(Player player, AdminWaystone waystone) {
-        if (!player.getWorld().equals(waystone.getLocation().getWorld())) {
+    private double calculateZoneSpawnDistance(Player player, DiscoveryZone zone) {
+        if (!zone.hasSpawn() || !player.getWorld().equals(zone.getSpawnLocation().getWorld())) {
             return -1;
         }
-        return player.getLocation().distance(waystone.getLocation());
+        return player.getLocation().distance(zone.getSpawnLocation());
+    }
+
+    public GuiItem getGuiItemAtSlot(Player player, int slot) {
+        int currentPage = playerPages.getOrDefault(player.getUniqueId(), 0);
+
+        Set<String> discoveredZones = plugin.getZoneManager().getDiscoveredZones(player);
+        Map<String, DiscoveryZone> allZones = plugin.getZoneManager().getAllZones();
+
+        // Créer la liste des éléments GUI (même logique que dans openWaystoneMenu)
+        List<GuiItem> allItems = new ArrayList<>();
+
+        // Ajouter les zones découvertes
+        for (String zoneId : discoveredZones) {
+            DiscoveryZone zone = allZones.get(zoneId);
+            if (zone != null) {
+                allItems.add(new GuiItem(zone, true));
+            }
+        }
+
+        // Ajouter les zones non découvertes
+        for (DiscoveryZone zone : allZones.values()) {
+            if (!discoveredZones.contains(zone.getId())) {
+                allItems.add(new GuiItem(zone, false));
+            }
+        }
+
+        int actualIndex = currentPage * ITEMS_PER_PAGE + slot;
+        if (actualIndex >= 0 && actualIndex < allItems.size()) {
+            return allItems.get(actualIndex);
+        }
+        return null;
     }
 }

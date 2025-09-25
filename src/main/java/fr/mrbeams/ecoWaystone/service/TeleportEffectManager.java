@@ -1,8 +1,8 @@
 package fr.mrbeams.ecoWaystone.service;
 
 import fr.mrbeams.ecoWaystone.EcoWaystone;
+import fr.mrbeams.ecoWaystone.util.ColorUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -74,12 +74,8 @@ public class TeleportEffectManager {
 
         // Son de départ
         if (effect.startSound != null && effect.startSoundEnabled) {
-            try {
-                player.getWorld().playSound(location, Sound.valueOf(effect.startSound),
-                    effect.startSoundVolume, effect.startSoundPitch);
-            } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Son invalide: " + effect.startSound);
-            }
+            plugin.getSoundManager().playSound(player, effect.startSound,
+                effect.startSoundVolume, effect.startSoundPitch);
         }
 
         // Particules de départ
@@ -100,7 +96,7 @@ public class TeleportEffectManager {
 
         // Message de départ
         if (effect.startMessage != null && !effect.startMessage.isEmpty()) {
-            Component message = LegacyComponentSerializer.legacySection().deserialize(effect.startMessage);
+            Component message = ColorUtils.parseColors(effect.startMessage);
             player.sendMessage(message);
         }
     }
@@ -110,12 +106,8 @@ public class TeleportEffectManager {
 
         // Son d'arrivée
         if (effect.endSound != null && effect.endSoundEnabled) {
-            try {
-                player.getWorld().playSound(location, Sound.valueOf(effect.endSound),
-                    effect.endSoundVolume, effect.endSoundPitch);
-            } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Son invalide: " + effect.endSound);
-            }
+            plugin.getSoundManager().playSound(player, effect.endSound,
+                effect.endSoundVolume, effect.endSoundPitch);
         }
 
         // Particules d'arrivée
@@ -136,7 +128,7 @@ public class TeleportEffectManager {
 
         // Message d'arrivée
         if (effect.endMessage != null && !effect.endMessage.isEmpty()) {
-            Component message = LegacyComponentSerializer.legacySection().deserialize(effect.endMessage);
+            Component message = ColorUtils.parseColors(effect.endMessage);
             player.sendMessage(message);
         }
     }
@@ -199,20 +191,20 @@ public class TeleportEffectManager {
         return available.get(0);
     }
 
-    public String getEffectDisplayName(String effectId) {
+    public Component getEffectDisplayName(String effectId) {
         ConfigurationSection effectSection = config.getConfigurationSection("effects." + effectId);
-        if (effectSection == null) return effectId;
+        if (effectSection == null) return Component.text(effectId);
 
         String name = effectSection.getString("name", effectId);
-        return LegacyComponentSerializer.legacySection().deserialize(name).toString();
+        return ColorUtils.parseColors(name);
     }
 
-    public String getEffectDescription(String effectId) {
+    public Component getEffectDescription(String effectId) {
         ConfigurationSection effectSection = config.getConfigurationSection("effects." + effectId);
-        if (effectSection == null) return "";
+        if (effectSection == null) return Component.empty();
 
         String description = effectSection.getString("description", "");
-        return LegacyComponentSerializer.legacySection().deserialize(description).toString();
+        return ColorUtils.parseColors(description);
     }
 
     private TeleportEffect loadEffect(String effectId) {

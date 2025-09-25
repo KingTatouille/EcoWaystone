@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mvn clean:*)"
+      "Bash(mvn clean:*)",
+      "Bash(jar:*)",
+      "Bash(findstr:*)",
+      "Bash(mvn:*)"
     ],
     "deny": [],
     "ask": []

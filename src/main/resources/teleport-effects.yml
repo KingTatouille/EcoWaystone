@@ -6,8 +6,8 @@ effects:
   # Effet basique (gratuit pour tous)
   basic:
     permission: ""  # Pas de permission requise
-    name: "&7Téléportation Basique"
-    description: "&7Effet de téléportation simple"
+    name: "&#AAAAAA Téléportation Basique"
+    description: "&#AAAAAA Effet de téléportation simple"
     enabled: true
 
     # Effets au départ (avant téléportation)
@@ -22,7 +22,7 @@ effects:
         type: "PORTAL"
         count: 20
         spread: 1.0
-      message: "&7Téléportation en cours..."
+      message: "&#AAAAAA Téléportation en cours..."
 
     # Effets à l'arrivée (après téléportation)
     end:
@@ -36,13 +36,13 @@ effects:
         type: "PORTAL"
         count: 15
         spread: 1.0
-      message: "&aTéléportation réussie !"
+      message: "&#00FF88Téléportation réussie !"
 
   # Effet magique (pour les VIP)
   magic:
     permission: "waystones.effects.magic"
-    name: "&5Téléportation Magique"
-    description: "&7Effet de téléportation avec magie"
+    name: "&#BB44DD✨ Téléportation Magique"
+    description: "&#AAAAAA Effet de téléportation avec magie"
     enabled: true
 
     start:
@@ -56,7 +56,7 @@ effects:
         type: "ENCHANTMENT_TABLE"
         count: 30
         spread: 2.0
-      message: "&5✨ Invocation du portail magique..."
+      message: "&#BB44DD✨ Invocation du portail magique..."
 
     end:
       sound:
@@ -69,13 +69,13 @@ effects:
         type: "ENCHANTMENT_TABLE"
         count: 25
         spread: 1.5
-      message: "&5✨ Vous émergez du portail magique !"
+      message: "&#BB44DD✨ Vous émergez du portail magique !"
 
   # Effet dragon (pour les donateurs premium)
   dragon:
     permission: "waystones.effects.dragon"
-    name: "&cTéléportation Draconique"
-    description: "&7Téléportation avec la puissance du dragon"
+    name: "&#FF6666🐉 Téléportation Draconique"
+    description: "&#AAAAAA Téléportation avec la puissance du dragon"
     enabled: true
 
     start:
@@ -216,3 +216,10 @@ settings:
 
   # Affichage dans le GUI pour changer d'effet
   show-in-gui: true
+
+# Exemples de sons custom du resource pack
+# Pour utiliser un son custom, remplacez "ENTITY_ENDERMAN_TELEPORT" par "votre_pack:nom_son"
+# Exemple:
+# - "ecowaystones:magical_teleport"
+# - "mysounds:dragon_roar"
+# - "custompack:portal_sound"

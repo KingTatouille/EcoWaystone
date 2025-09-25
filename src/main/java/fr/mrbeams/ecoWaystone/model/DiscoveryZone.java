@@ -14,27 +14,27 @@ public class DiscoveryZone implements ConfigurationSerializable {
     private final String id;
     private final String regionName;
     private final String displayName;
+    private final String description;
     private final String title;
     private final String subtitle;
+    private final String customItem;
     private Location spawnLocation;
 
     public DiscoveryZone(String id, String regionName, String displayName, String title, String subtitle) {
+        this(id, regionName, displayName, "", title, subtitle, null);
+    }
+
+    public DiscoveryZone(String id, String regionName, String displayName, String description, String title, String subtitle, String customItem) {
         this.id = id;
         this.regionName = regionName;
         this.displayName = displayName;
+        this.description = description != null ? description : "";
         this.title = title;
         this.subtitle = subtitle;
+        this.customItem = customItem != null ? customItem : "";
         this.spawnLocation = null;
     }
 
-    public DiscoveryZone(String id, String regionName, String displayName, String title, String subtitle, Location spawnLocation) {
-        this.id = id;
-        this.regionName = regionName;
-        this.displayName = displayName;
-        this.title = title;
-        this.subtitle = subtitle;
-        this.spawnLocation = spawnLocation;
-    }
 
     public String getId() {
         return id;
@@ -46,6 +46,10 @@ public class DiscoveryZone implements ConfigurationSerializable {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public String getTitle() {
@@ -68,14 +72,20 @@ public class DiscoveryZone implements ConfigurationSerializable {
         return spawnLocation != null;
     }
 
+    public String getCustomItem() {
+        return customItem;
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
         map.put("regionName", regionName);
         map.put("displayName", displayName);
+        map.put("description", description);
         map.put("title", title);
         map.put("subtitle", subtitle);
+        map.put("customItem", customItem);
 
         if (spawnLocation != null) {
             map.put("spawnWorld", spawnLocation.getWorld().getName());
@@ -93,8 +103,10 @@ public class DiscoveryZone implements ConfigurationSerializable {
         String id = (String) map.get("id");
         String regionName = (String) map.get("regionName");
         String displayName = (String) map.get("displayName");
+        String description = (String) map.getOrDefault("description", ""); // Compatibilité anciennes zones
         String title = (String) map.get("title");
         String subtitle = (String) map.get("subtitle");
+        String customItem = (String) map.get("customItem");
 
         Location spawnLocation = null;
         if (map.containsKey("spawnWorld")) {
@@ -114,6 +126,8 @@ public class DiscoveryZone implements ConfigurationSerializable {
             }
         }
 
-        return new DiscoveryZone(id, regionName, displayName, title, subtitle, spawnLocation);
+        DiscoveryZone zone = new DiscoveryZone(id, regionName, displayName, description, title, subtitle, customItem);
+        zone.setSpawnLocation(spawnLocation);
+        return zone;
     }
 }

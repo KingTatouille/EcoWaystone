@@ -1,55 +1,100 @@
 package fr.mrbeams.ecoWaystone.service;
 
+import dev.lone.itemsadder.api.CustomBlock;
 import dev.lone.itemsadder.api.CustomStack;
-import org.bukkit.inventory.ItemStack;
+import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
+import dev.lone.itemsadder.api.ItemsAdder;
+import fr.mrbeams.ecoWaystone.EcoWaystone;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 
-public class ItemsAdderIntegration {
-    private static final String WAYSTONE_ITEM_ID = "ecowaystone:waystone";
-    private static final String WARP_KEY_ITEM_ID = "ecowaystone:warp_key";
+public class ItemsAdderIntegration implements Listener {
 
-    public static boolean isCustomWaystone(ItemStack item) {
-        if (item == null) {
-            return false;
-        }
+    private final EcoWaystone plugin;
+    private boolean itemsAdderReady = false;
 
-        CustomStack customStack = CustomStack.byItemStack(item);
-        return customStack != null && WAYSTONE_ITEM_ID.equals(customStack.getNamespacedID());
+    public ItemsAdderIntegration(EcoWaystone plugin) {
+        this.plugin = plugin;
+        checkItemsAdderStatus();
     }
 
-    public static boolean isCustomWarpKey(ItemStack item) {
-        if (item == null) {
-            return false;
-        }
-
-        CustomStack customStack = CustomStack.byItemStack(item);
-        return customStack != null && WARP_KEY_ITEM_ID.equals(customStack.getNamespacedID());
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onItemsAdderLoadData(ItemsAdderLoadDataEvent event) {
+        plugin.getLogger().info("ItemsAdder data loaded/reloaded");
+        itemsAdderReady = true;
     }
 
-    public static ItemStack getCustomWaystone() {
-        CustomStack customStack = CustomStack.getInstance(WAYSTONE_ITEM_ID);
-        return customStack != null ? customStack.getItemStack() : null;
-    }
-
-    public static ItemStack getCustomWarpKey() {
-        CustomStack customStack = CustomStack.getInstance(WARP_KEY_ITEM_ID);
-        return customStack != null ? customStack.getItemStack() : null;
-    }
-
-    public static boolean isItemsAdderAvailable() {
+    private void checkItemsAdderStatus() {
         try {
-            Class.forName("dev.lone.itemsadder.api.CustomStack");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+            if (plugin.getServer().getPluginManager().isPluginEnabled("ItemsAdder")) {
+                itemsAdderReady = ItemsAdder.areItemsLoaded();
+                if (itemsAdderReady) {
+                    plugin.getLogger().info("ItemsAdder is ready and items are loaded");
+                } else {
+                    plugin.getLogger().info("ItemsAdder found but items not loaded yet, waiting for ItemsAdderLoadDataEvent...");
+                }
+            } else {
+                itemsAdderReady = false;
+                plugin.getLogger().info("ItemsAdder not found or not enabled yet, waiting for plugin to load...");
+            }
+        } catch (Exception e) {
+            itemsAdderReady = false;
+            plugin.getLogger().warning("Error checking ItemsAdder status: " + e.getMessage());
         }
     }
 
-    public static String getCustomItemId(ItemStack item) {
-        if (item == null) {
+    public boolean isItemsAdderReady() {
+        return itemsAdderReady && ItemsAdder.areItemsLoaded();
+    }
+
+    public boolean isWaystoneItem(String namespace) {
+        if (!isItemsAdderReady()) {
+            return false;
+        }
+        return CustomStack.isInRegistry(namespace);
+    }
+
+    public boolean isWaystoneBlock(String namespace) {
+        if (!isItemsAdderReady()) {
+            return false;
+        }
+        return CustomBlock.isInRegistry(namespace);
+    }
+
+    public CustomStack getWaystoneItem(String namespace) {
+        if (!isItemsAdderReady()) {
+            plugin.getLogger().warning("Attempted to get waystone item before ItemsAdder is ready: " + namespace);
             return null;
         }
 
-        CustomStack customStack = CustomStack.byItemStack(item);
-        return customStack != null ? customStack.getNamespacedID() : null;
+        CustomStack stack = CustomStack.getInstance(namespace);
+        if (stack == null) {
+            // Log au niveau debug seulement pour éviter le spam dans les logs
+            plugin.getLogger().fine("Waystone item not found in ItemsAdder registry: " + namespace);
+        }
+        return stack;
+    }
+
+    public CustomBlock getWaystoneBlock(String namespace) {
+        if (!isItemsAdderReady()) {
+            plugin.getLogger().warning("Attempted to get waystone block before ItemsAdder is ready: " + namespace);
+            return null;
+        }
+
+        CustomBlock block = CustomBlock.getInstance(namespace);
+        if (block == null) {
+            // Log au niveau debug seulement pour éviter le spam dans les logs
+            plugin.getLogger().fine("Waystone block not found in ItemsAdder registry: " + namespace);
+        }
+        return block;
+    }
+
+    public String getWaystoneNamespace() {
+        return plugin.getConfig().getString("admin-waystones.waystone-item", "ecowaystone:waystone");
+    }
+
+    public String getDefaultIconNamespace() {
+        return plugin.getConfig().getString("admin-waystones.default-icon", "ecowaystone:waystone");
     }
 }

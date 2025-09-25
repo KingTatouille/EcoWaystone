@@ -2,5 +2,61 @@ name: EcoWaystone
 version: '1.0'
 main: fr.mrbeams.ecoWaystone.EcoWaystone
 api-version: '1.21'
-load: STARTUP
+load: POSTWORLD
 authors: [ MrBeams ]
+description: 'Admin Waystone System with ItemsAdder Integration'
+depend: [ ItemsAdder, WorldGuard ]
+softdepend: [ Vault ]
+
+commands:
+  waystone:
+    description: 'Ouvre le menu des waystones ou gère les zones'
+    usage: '/waystone [player] | /waystone admin <create|delete|setspawn|removespawn|discover|undiscover> [args...]'
+    permission: waystones.use
+
+permissions:
+  # Admin permissions
+  waystones.admin.use:
+    description: 'Basic admin waystone usage'
+    default: op
+  waystones.admin.place:
+    description: 'Allows placing admin waystones'
+    default: op
+  waystones.admin.break:
+    description: 'Allows breaking admin waystones'
+    default: op
+  waystones.admin.create:
+    description: 'Allows creating waystones via command'
+    default: op
+  waystones.admin.give:
+    description: 'Allows giving waystone items via command'
+    default: op
+  waystones.admin.rename:
+    description: 'Allows renaming waystones via command'
+    default: op
+  waystones.admin.delete:
+    description: 'Allows deleting waystones via command'
+    default: op
+  waystones.admin.list:
+    description: 'Allows listing all waystones'
+    default: op
+  waystones.admin.info:
+    description: 'Allows viewing waystone information'
+    default: op
+  waystones.admin.reload:
+    description: 'Allows reloading the plugin'
+    default: op
+  waystones.admin.discover:
+    description: 'Allows forcing zone discovery for players'
+    default: op
+  waystones.admin.opengui:
+    description: 'Allows opening waystone GUI for other players'
+    default: op
+
+  # Player permissions
+  waystones.use:
+    description: 'Use waystone GUI and teleportation'
+    default: true
+  waystones.discover:
+    description: 'Discover new waystones'
+    default: true

@@ -6,42 +6,44 @@ default-zone-items:
   discovered:
     material: "MAP"  # Item Minecraft par défaut
     itemsadder: ""   # ID ItemsAdder optionnel (vide = utilise material)
-    name: "&a%zone_name%"
+    name: "&#00FF88%zone_name%"
     lore:
-      - "&7Zone découverte"
-      - "&7Région WorldGuard: &e%region%"
+      - "&#AAAAAA Zone découverte"
+      - "%description%"
       - ""
-      - "&aCliquez pour vous téléporter"
+      - "&#00FF88Cliquez pour vous téléporter"
 
   undiscovered:
     material: "GRAY_DYE"
     itemsadder: ""
-    name: "&7Zone inconnue"
+    name: "&#888888Zone inconnue"
     lore:
-      - "&7Cette zone n'a pas encore été découverte"
-      - "&7Explorez pour la découvrir"
+      - "&#CC6666Cette zone n'a pas encore été découverte"
+      - "%description%"
+      - ""
+      - "&#AAAAAA Explorez pour la découvrir"
 
 # Items par défaut pour les waystones
 default-waystone-items:
   discovered:
     material: "LODESTONE"
     itemsadder: "ecowaystone:waystone"  # Item ItemsAdder par défaut
-    name: "&b%waystone_name%"
+    name: "&#44CCFF%waystone_name%"
     lore:
-      - "&7Localisation: &e%location%"
-      - "&7Distance: &e%distance% blocs"
+      - "&#AAAAAA Localisation: &#FFDD44%location%"
+      - "&#AAAAAA Distance: &#FFDD44%distance% blocs"
       - ""
-      - "&aCliquez pour vous téléporter"
+      - "&#00FF88Cliquez pour vous téléporter"
 
   undiscovered:
     material: "GRAY_DYE"
     itemsadder: ""
-    name: "&7Waystone inconnue"
+    name: "&#888888Waystone inconnue"
     lore:
-      - "&7Cette waystone n'a pas encore été découverte"
-      - "&7Coût d'achat: &6%cost%"
+      - "&#CC6666Cette waystone n'a pas encore été découverte"
+      - "&#AAAAAA Coût d'achat: &#FFB366%cost%"
       - ""
-      - "&eCliquez pour acheter la découverte"
+      - "&#FFDD44Cliquez pour acheter la découverte"
 
 # Configuration spécifique par zone (optionnel)
 # Permet d'assigner des items custom à des zones spécifiques
@@ -65,21 +67,21 @@ custom-zone-items:
 navigation-items:
   previous-page:
     material: "ARROW"
-    name: "&ePage précédente"
+    name: "&#FFDD44Page précédente"
     lore:
-      - "&7Cliquez pour aller à la page %page%"
+      - "&#AAAAAA Cliquez pour aller à la page &#FFDD44%page%"
 
   next-page:
     material: "ARROW"
-    name: "&ePage suivante"
+    name: "&#FFDD44Page suivante"
     lore:
-      - "&7Cliquez pour aller à la page %page%"
+      - "&#AAAAAA Cliquez pour aller à la page &#FFDD44%page%"
 
   close:
     material: "BARRIER"
-    name: "&cFermer"
+    name: "&#FF6666Fermer"
     lore:
-      - "&7Cliquez pour fermer"
+      - "&#AAAAAA Cliquez pour fermer"
 
   filler:
     material: "GRAY_STAINED_GLASS_PANE"

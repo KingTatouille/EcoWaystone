@@ -2,36 +2,47 @@ package fr.mrbeams.ecoWaystone.listener;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import fr.mrbeams.ecoWaystone.EcoWaystone;
 import fr.mrbeams.ecoWaystone.model.DiscoveryZone;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ZoneDiscoveryListener implements Listener {
 
     private final EcoWaystone plugin;
     private final Map<UUID, Set<String>> playerCurrentRegions;
+    private final Map<UUID, Long> lastChecked;
+    private static final long CHECK_COOLDOWN = 1000; // 1 seconde entre les vérifications
 
     public ZoneDiscoveryListener(EcoWaystone plugin) {
         this.plugin = plugin;
-        this.playerCurrentRegions = new HashMap<>();
+        this.playerCurrentRegions = new ConcurrentHashMap<>();
+        this.lastChecked = new ConcurrentHashMap<>();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
+        UUID playerId = player.getUniqueId();
 
         // Vérifier seulement si le joueur a changé de bloc
         if (event.getFrom().getBlockX() == event.getTo().getBlockX() &&
@@ -40,7 +51,52 @@ public class ZoneDiscoveryListener implements Listener {
             return;
         }
 
+        // Vérifier le cooldown pour éviter les vérifications trop fréquentes
+        long currentTime = System.currentTimeMillis();
+        Long lastCheck = lastChecked.get(playerId);
+        if (lastCheck != null && (currentTime - lastCheck) < CHECK_COOLDOWN) {
+            return;
+        }
+
+        lastChecked.put(playerId, currentTime);
         checkRegionEntry(player);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        // Vérifier immédiatement après une téléportation
+        Player player = event.getPlayer();
+
+        // Utiliser un délai pour s'assurer que la téléportation est complète
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (player.isOnline()) {
+                    checkRegionEntry(player);
+                }
+            }
+        }.runTaskLater(plugin, 2L); // 2 ticks de délai
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        // Vérifier les régions quelques secondes après la connexion
+        Player player = event.getPlayer();
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (player.isOnline()) {
+                    checkRegionEntry(player);
+                }
+            }
+        }.runTaskLater(plugin, 40L); // 2 secondes de délai
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID playerId = event.getPlayer().getUniqueId();
+        onPlayerQuit(playerId);
     }
 
     private void checkRegionEntry(Player player) {
@@ -51,6 +107,7 @@ public class ZoneDiscoveryListener implements Listener {
                     .get(BukkitAdapter.adapt(player.getWorld()));
 
             if (regionManager == null) {
+                plugin.getLogger().warning("RegionManager est null pour le monde: " + player.getWorld().getName());
                 return;
             }
 
@@ -83,7 +140,8 @@ public class ZoneDiscoveryListener implements Listener {
             playerCurrentRegions.put(playerId, currentRegions);
 
         } catch (Exception e) {
-            // Ignorer les erreurs silencieusement pour éviter le spam de logs
+            plugin.getLogger().severe("Erreur lors de la vérification des régions pour " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -103,5 +161,6 @@ public class ZoneDiscoveryListener implements Listener {
 
     public void onPlayerQuit(UUID playerId) {
         playerCurrentRegions.remove(playerId);
+        lastChecked.remove(playerId);
     }
 }
