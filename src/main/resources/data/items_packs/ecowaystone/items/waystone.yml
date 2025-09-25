@@ -1,0 +1,41 @@
+info:
+  namespace: ecowaystone
+items:
+  waystone:
+    display_name: "Waystone"
+    permission: ecowaystone.waystone
+    resource:
+      material: LODESTONE
+      generate: true
+      textures:
+        - item/waystone.png
+    durability:
+      max_custom_durability: 100
+    specific_properties:
+      block:
+        placed_model:
+          type: REAL_NOTE_BLOCK
+          break_particles_material: LODESTONE
+        custom_variants:
+          - waystone
+    lore:
+      - "Place this waystone to create"
+      - "a teleportation point."
+      - "Right-click with a compass to link it."
+    behaviours:
+      furniture: false
+      furniture_entity: false
+    events:
+      placed_block:
+        interact:
+          right_click:
+            player_command:
+              as_console: false
+              command: ""
+              permission: ""
+      interact:
+        right_click:
+          player_command:
+            as_console: false
+            command: ""
+            permission: ""

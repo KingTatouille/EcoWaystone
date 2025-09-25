@@ -1,0 +1,218 @@
+# Configuration des effets de téléportation
+# Les joueurs peuvent utiliser différents effets selon leurs permissions
+
+# Effets de téléportation disponibles
+effects:
+  # Effet basique (gratuit pour tous)
+  basic:
+    permission: ""  # Pas de permission requise
+    name: "&7Téléportation Basique"
+    description: "&7Effet de téléportation simple"
+    enabled: true
+
+    # Effets au départ (avant téléportation)
+    start:
+      sound:
+        enabled: true
+        type: "ENTITY_ENDERMAN_TELEPORT"
+        volume: 1.0
+        pitch: 1.0
+      particles:
+        enabled: true
+        type: "PORTAL"
+        count: 20
+        spread: 1.0
+      message: "&7Téléportation en cours..."
+
+    # Effets à l'arrivée (après téléportation)
+    end:
+      sound:
+        enabled: true
+        type: "ENTITY_ENDERMAN_TELEPORT"
+        volume: 1.0
+        pitch: 1.2
+      particles:
+        enabled: true
+        type: "PORTAL"
+        count: 15
+        spread: 1.0
+      message: "&aTéléportation réussie !"
+
+  # Effet magique (pour les VIP)
+  magic:
+    permission: "waystones.effects.magic"
+    name: "&5Téléportation Magique"
+    description: "&7Effet de téléportation avec magie"
+    enabled: true
+
+    start:
+      sound:
+        enabled: true
+        type: "ENTITY_EVOKER_CAST_SPELL"
+        volume: 1.0
+        pitch: 0.8
+      particles:
+        enabled: true
+        type: "ENCHANTMENT_TABLE"
+        count: 30
+        spread: 2.0
+      message: "&5✨ Invocation du portail magique..."
+
+    end:
+      sound:
+        enabled: true
+        type: "ENTITY_EVOKER_CAST_SPELL"
+        volume: 1.0
+        pitch: 1.2
+      particles:
+        enabled: true
+        type: "ENCHANTMENT_TABLE"
+        count: 25
+        spread: 1.5
+      message: "&5✨ Vous émergez du portail magique !"
+
+  # Effet dragon (pour les donateurs premium)
+  dragon:
+    permission: "waystones.effects.dragon"
+    name: "&cTéléportation Draconique"
+    description: "&7Téléportation avec la puissance du dragon"
+    enabled: true
+
+    start:
+      sound:
+        enabled: true
+        type: "ENTITY_ENDER_DRAGON_GROWL"
+        volume: 0.8
+        pitch: 1.0
+      particles:
+        enabled: true
+        type: "DRAGON_BREATH"
+        count: 40
+        spread: 2.5
+      message: "&c🐉 Le dragon vous emporte dans ses flammes..."
+
+    end:
+      sound:
+        enabled: true
+        type: "ENTITY_ENDER_DRAGON_FLAP"
+        volume: 0.8
+        pitch: 1.3
+      particles:
+        enabled: true
+        type: "DRAGON_BREATH"
+        count: 30
+        spread: 2.0
+      message: "&c🐉 Vous atterrissez grâce au dragon !"
+
+  # Effet nature (pour les joueurs eco-friendly)
+  nature:
+    permission: "waystones.effects.nature"
+    name: "&2Téléportation Naturelle"
+    description: "&7Téléportation en harmonie avec la nature"
+    enabled: true
+
+    start:
+      sound:
+        enabled: true
+        type: "BLOCK_GRASS_STEP"
+        volume: 1.0
+        pitch: 0.7
+      particles:
+        enabled: true
+        type: "VILLAGER_HAPPY"
+        count: 25
+        spread: 1.8
+      message: "&2🌿 La nature vous guide..."
+
+    end:
+      sound:
+        enabled: true
+        type: "BLOCK_GRASS_STEP"
+        volume: 1.0
+        pitch: 1.1
+      particles:
+        enabled: true
+        type: "VILLAGER_HAPPY"
+        count: 20
+        spread: 1.5
+      message: "&2🌿 Vous arrivez en paix avec la nature !"
+
+  # Effet technologique (pour les amateurs de redstone)
+  tech:
+    permission: "waystones.effects.tech"
+    name: "&bTéléportation Technologique"
+    description: "&7Téléportation avec technologie avancée"
+    enabled: true
+
+    start:
+      sound:
+        enabled: true
+        type: "BLOCK_BEACON_ACTIVATE"
+        volume: 1.0
+        pitch: 1.0
+      particles:
+        enabled: true
+        type: "REDSTONE"
+        count: 35
+        spread: 2.0
+      message: "&b⚡ Activation du téléporteur quantique..."
+
+    end:
+      sound:
+        enabled: true
+        type: "BLOCK_BEACON_DEACTIVATE"
+        volume: 1.0
+        pitch: 1.2
+      particles:
+        enabled: true
+        type: "REDSTONE"
+        count: 25
+        spread: 1.5
+      message: "&b⚡ Matérialisation terminée !"
+
+  # Effet discret (pour les ninjas)
+  stealth:
+    permission: "waystones.effects.stealth"
+    name: "&8Téléportation Furtive"
+    description: "&7Téléportation silencieuse et discrète"
+    enabled: true
+
+    start:
+      sound:
+        enabled: true
+        type: "ENTITY_BAT_TAKEOFF"
+        volume: 0.3
+        pitch: 0.8
+      particles:
+        enabled: true
+        type: "SMOKE_NORMAL"
+        count: 15
+        spread: 1.0
+      message: "&8💨 Vous disparaissez dans l'ombre..."
+
+    end:
+      sound:
+        enabled: true
+        type: "ENTITY_BAT_AMBIENT"
+        volume: 0.2
+        pitch: 1.0
+      particles:
+        enabled: true
+        type: "SMOKE_NORMAL"
+        count: 10
+        spread: 0.8
+      message: "&8💨 Vous réapparaissez silencieusement !"
+
+# Configuration générale
+settings:
+  # Délai entre les effets de départ et d'arrivée (en ticks, 20 ticks = 1 seconde)
+  teleport-delay: 40
+
+  # Permettre aux joueurs de choisir leur effet via commande
+  allow-player-choice: true
+
+  # Effet par défaut si le joueur n'en a pas choisi
+  default-effect: "basic"
+
+  # Affichage dans le GUI pour changer d'effet
+  show-in-gui: true

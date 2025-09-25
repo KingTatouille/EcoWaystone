@@ -1,0 +1,87 @@
+# Configuration des items du GUI Waystone
+# Ce fichier permet de personnaliser l'apparence des zones et waystones dans le menu
+
+# Items par défaut pour les zones
+default-zone-items:
+  discovered:
+    material: "MAP"  # Item Minecraft par défaut
+    itemsadder: ""   # ID ItemsAdder optionnel (vide = utilise material)
+    name: "&a%zone_name%"
+    lore:
+      - "&7Zone découverte"
+      - "&7Région WorldGuard: &e%region%"
+      - ""
+      - "&aCliquez pour vous téléporter"
+
+  undiscovered:
+    material: "GRAY_DYE"
+    itemsadder: ""
+    name: "&7Zone inconnue"
+    lore:
+      - "&7Cette zone n'a pas encore été découverte"
+      - "&7Explorez pour la découvrir"
+
+# Items par défaut pour les waystones
+default-waystone-items:
+  discovered:
+    material: "LODESTONE"
+    itemsadder: "ecowaystone:waystone"  # Item ItemsAdder par défaut
+    name: "&b%waystone_name%"
+    lore:
+      - "&7Localisation: &e%location%"
+      - "&7Distance: &e%distance% blocs"
+      - ""
+      - "&aCliquez pour vous téléporter"
+
+  undiscovered:
+    material: "GRAY_DYE"
+    itemsadder: ""
+    name: "&7Waystone inconnue"
+    lore:
+      - "&7Cette waystone n'a pas encore été découverte"
+      - "&7Coût d'achat: &6%cost%"
+      - ""
+      - "&eCliquez pour acheter la découverte"
+
+# Configuration spécifique par zone (optionnel)
+# Permet d'assigner des items custom à des zones spécifiques
+custom-zone-items:
+  # Exemple:
+  # spawn:
+  #   discovered:
+  #     itemsadder: "ecowaystone:spawn_crystal"
+  #     name: "&6Spawn Principal"
+  #   undiscovered:
+  #     itemsadder: "ecowaystone:unknown_crystal"
+  #
+  # foret_enchantee:
+  #   discovered:
+  #     itemsadder: "ecowaystone:forest_gem"
+  #     name: "&2Forêt Enchantée"
+  #   undiscovered:
+  #     itemsadder: "ecowaystone:mysterious_seed"
+
+# Items de navigation du GUI
+navigation-items:
+  previous-page:
+    material: "ARROW"
+    name: "&ePage précédente"
+    lore:
+      - "&7Cliquez pour aller à la page %page%"
+
+  next-page:
+    material: "ARROW"
+    name: "&ePage suivante"
+    lore:
+      - "&7Cliquez pour aller à la page %page%"
+
+  close:
+    material: "BARRIER"
+    name: "&cFermer"
+    lore:
+      - "&7Cliquez pour fermer"
+
+  filler:
+    material: "GRAY_STAINED_GLASS_PANE"
+    name: " "
+    lore: []

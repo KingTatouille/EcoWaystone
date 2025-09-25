@@ -1,0 +1,6 @@
+name: EcoWaystone
+version: '1.0'
+main: fr.mrbeams.ecoWaystone.EcoWaystone
+api-version: '1.21'
+load: STARTUP
+authors: [ MrBeams ]

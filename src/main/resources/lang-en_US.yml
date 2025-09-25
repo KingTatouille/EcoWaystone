@@ -1,0 +1,126 @@
+# English (US) Language File for EcoWaystone
+
+# General Messages
+plugin:
+  name: "EcoWaystone"
+  version: "1.0"
+  author: "MrBeams"
+  description: "Teleportation through waystones without commands"
+
+# Command Messages
+commands:
+  no-permission: "You don't have permission to use this command."
+  player-not-found: "Player {0} not found."
+  invalid-syntax: "Invalid syntax. Use: {0}"
+  config-reloaded: "Configuration reloaded successfully."
+  advancements-reloaded: "Advancements reloaded successfully."
+
+  info:
+    header: "=== EcoWaystone Information ==="
+    version: "Version: {0}"
+    author: "Author: {1}"
+    description: "Description: {2}"
+
+  getkey:
+    success-self: "You received {0} warp key(s)."
+    success-other: "{0} received {1} warp key(s)."
+
+  config:
+    current-value: "Current value of {0}: {1}"
+    value-updated: "Configuration value {0} updated to: {1}"
+    invalid-property: "Invalid configuration property: {0}"
+
+  ratio:
+    current-ratio: "Current ratio for {0}: {1}"
+    ratio-set: "Ratio for {0} set to: {1}"
+    ratio-removed: "Ratio for {0} removed."
+    no-ratios: "No custom ratios configured."
+    list-header: "=== Configured Ratios ==="
+
+# Waystone Messages
+waystone:
+  created: "Waystone created successfully."
+  named: "Waystone named: {0}"
+  linked: "Waystone linked to warp key."
+  already-linked: "This warp key is already linked to a waystone."
+  already-exists: "A waystone already exists at this location."
+  not-linked: "This warp key is not linked to any waystone."
+  destroyed: "Waystone destroyed."
+  blocked: "This waystone is blocked by obsidian."
+  out-of-range: "Target waystone is out of range. Distance: {0}, Max: {1}"
+  no-power: "Waystone requires power to function."
+  insufficient-power: "Insufficient power for teleportation."
+
+# Teleportation Messages
+teleport:
+  preparing: "Preparing to teleport... Stand still for {0} seconds."
+  cancelled-movement: "Teleportation cancelled - you moved!"
+  cancelled-damage: "Teleportation cancelled - you took damage!"
+  success: "Teleported successfully!"
+  failed: "Teleportation failed."
+
+# Portal Sickness Messages
+portal-sickness:
+  contracted: "You feel sick from the teleportation..."
+  prevented: "You feel too sick to teleport right now."
+  damage: "The teleportation hurts while you're sick!"
+
+# Item Names and Descriptions
+items:
+  warp-key:
+    name: "Warp Key"
+    lore:
+      - "Right-click to teleport"
+      - "Link to a waystone by right-clicking it"
+    linked-lore:
+      - "Linked to: {0}"
+      - "Right-click to teleport"
+
+# Error Messages
+errors:
+  no-waystone: "No waystone found at this location."
+  invalid-world: "Invalid world or world not loaded."
+  teleport-failed: "Teleportation failed due to an error."
+  config-error: "Configuration error: {0}"
+
+# Advancement Titles and Descriptions
+advancements:
+  waystones:
+    title: "Waystones"
+    description: "Link a waystone to a warp key"
+
+  secret-tunnel:
+    title: "Secret Tunnel"
+    description: "Use a waystone for the first time"
+
+  gigawarps:
+    title: "1.21 Gigawarps"
+    description: "Travel over 50% of the max warp distance using a waystone"
+
+  portal-sickness:
+    title: "I Don't Feel So Good"
+    description: "Get hit with portal sickness from using a waystone"
+
+  heavy-artillery:
+    title: "Heavy Artillery"
+    description: "Power up a waystone with a netherite block"
+
+  unlimited-power:
+    title: "Unlimited Power"
+    description: "Overcharge a waystone's power source causing it to explode"
+
+  quantum-domestication:
+    title: "Quantum Domestication"
+    description: "Give a waystone a name"
+
+  blocked:
+    title: "Blocked"
+    description: "Suppress a waystone with obsidian to prevent people from using it"
+
+  shoot-messenger:
+    title: "Shoot The Messenger"
+    description: "Nearly die from a skeleton while attempting to warp away"
+
+  clean-energy:
+    title: "Clean Energy"
+    description: "Use a waystone that's powered off the same energy source as a beacon"

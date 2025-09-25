@@ -1,0 +1,18 @@
+info:
+  namespace: ecowaystone
+recipes:
+  warp_key:
+    permission: ecowaystone.craft.warp_key
+    enabled: true
+    shaped:
+      pattern:
+        - "GIG"
+        - "ICI"
+        - "GIG"
+      ingredients:
+        G: GOLD_INGOT
+        I: IRON_INGOT
+        C: COMPASS
+      result:
+        item: ecowaystone:warp_key
+        amount: 1

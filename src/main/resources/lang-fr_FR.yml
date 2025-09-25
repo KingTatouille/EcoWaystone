@@ -1,0 +1,62 @@
+# EcoWaystone Fichier de Langue - Français (FR)
+
+# Messages de l'Interface Graphique
+gui:
+  waystone:
+    title: "&bPierres de Transport"
+    click_to_teleport: "&7Cliquez pour vous téléporter"
+
+# Messages des Pierres de Transport
+waystone:
+  placed: "&aPierre de transport placée à %location%"
+  removed: "&cPierre de transport &e%name% &csupprimée"
+  discovered: "&6Vous avez découvert la pierre de transport : &e%name%"
+  discovery_count: "&aTotal découvert : &e%count%"
+  teleporting: "&aTéléportation vers &e%name%&a..."
+  teleport_success: "&aTéléportation réussie vers &e%name%"
+
+# Messages d'Erreur
+error:
+  no_permission_place: "&cVous n'avez pas la permission de placer des pierres de transport"
+  no_permission_break: "&cVous n'avez pas la permission de casser des pierres de transport"
+  waystone_not_found: "&cPierre de transport non trouvée"
+  waystone_not_discovered: "&cVous n'avez pas encore découvert cette pierre de transport"
+
+# Messages de Commande
+command:
+  waystone_created: "&aPierre de transport '&e%name%&a' créée à votre position"
+  waystone_deleted: "&cPierre de transport '&e%name%&c' supprimée"
+  waystone_not_exists: "&cLa pierre de transport avec l'ID '&e%id%&c' n'existe pas"
+  waystone_already_exists: "&cUne pierre de transport avec l'ID '&e%id%&c' existe déjà"
+  no_waystones_found: "&eAucune pierre de transport trouvée"
+  plugin_reloaded: "&aEcoWaystone rechargé avec succès"
+
+# Messages d'Aide
+help:
+  header: "&6=== Commandes EcoWaystone ==="
+  create: "&b/waystones create <id> <nom> &7- Créer une pierre de transport"
+  delete: "&b/waystones delete <id> &7- Supprimer une pierre de transport"
+  list: "&b/waystones list &7- Lister toutes les pierres de transport"
+  info: "&b/waystones info <id> &7- Afficher les informations d'une pierre de transport"
+  reload: "&b/waystones reload &7- Recharger le plugin"
+
+# Messages de Découverte
+discovery:
+  sound_enabled: true
+  broadcast_message: "&e%player% &6a découvert la pierre de transport : &e%name%"
+
+# Messages d'Intégration ItemsAdder
+itemsadder:
+  not_ready: "&cItemsAdder n'est pas encore prêt, veuillez patienter..."
+  reloaded: "&aItemsAdder rechargé, système de pierres de transport mis à jour"
+  item_not_found: "&cObjet ItemsAdder non trouvé : &e%item%"
+  validation_complete: "&aValidation des pierres de transport terminée"
+
+# Messages de Zone
+zone:
+  entered: "&6Vous êtes entré dans la zone : &e%name%"
+  discovered: "&aVous avez découvert la zone : &e%name%"
+  already_discovered: "&eVous avez déjà découvert cette zone"
+  spawn_created: "&aPoint d'apparition créé dans la zone &e%name%"
+  spawn_removed: "&cPoint d'apparition supprimé de la zone &e%name%"
+  spawn_not_found: "&cAucun point d'apparition trouvé dans cette zone"
